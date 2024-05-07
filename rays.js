@@ -1,4 +1,10 @@
-const MOVE_MULT = 0.2;
+import { Color } from "./color.js";
+import { SCENE } from "./scene.js";
+import { runTests } from "./tests.js";
+import { userInteraction } from "./userInteraction.js";
+import { Vec3D } from "./vec3d.js";
+
+export const MOVE_MULT = 0.2;
 const SHRINK_FACTOR = 8;
 const REFLECTION_DEPTH = 2;
 const MAX_DIST = 20;
@@ -14,156 +20,12 @@ const ctx = canvas.getContext('2d');
 [canvas.width, canvas.height] = [CANV_WIDTH, CANV_HEIGHT];
 const canvasImg = ctx.getImageData(0, 0, CANV_WIDTH, CANV_HEIGHT);
 
-let isRealtime = false;
-let trackingMouse = false;
-let [startX, startY] = [0.0, 0.0];
-let camera = {
+export let isRealtime = false;
+export const camera = {
     position: { x: -0.2, y: 2.0, z: 10 },
     fov: 45,
     vector: { x: 0, y: 3, z: 0 },
 };
-
-// TODO refactor interactivity to its own unit
-document.onmousemove = function(e) {
-    const [mouseX, mouseY] = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
-    if (trackingMouse) {
-        camera.vector.x += (startX - mouseX) * 1.0;
-        camera.vector.y += (startY - mouseY) * 1.0;
-        document.body.style.cursor = "grabbing";
-    }
-};
-document.addEventListener('mousedown', function(e) {
-    if (!isRealtime) redrawFrame();
-    [startX, startY] = [e.clientX / window.innerWidth, e.clientY / window.innerHeight];
-    trackingMouse = true;
-
-});
-document.addEventListener('mouseup', function() {
-    trackingMouse = false;
-    document.body.style.cursor = "unset";
-});
-document.addEventListener('keydown', function(e) {
-    switch (e.key) {
-        case 'w':
-            camera.position.z += -1 * MOVE_MULT;
-            break;
-        case 's':
-            camera.position.z += 1 * MOVE_MULT;
-            break;
-        case 'a':
-            camera.position.x += -1 * MOVE_MULT;
-            break;
-        case 'd':
-            camera.position.x += 1 * MOVE_MULT;
-            break;
-    }
-});
-
-class Color {
-    constructor(r, g, b) {
-        [this.r, this.g, this.b] = [r, g, b];
-    }
-
-    add(c) {
-        this.r += c.r; this.g += c.g; this.b += c.b;
-        return this;
-    }
-
-    scaleBy(x) {
-        this.r *= x; this.g *= x; this.b *= x;
-        return this;
-    }
-}
-
-const SCENE = {
-    lights: [{ x: -40, y: -10, z: 40 }],
-    objects: [
-        {
-            type: "sphere",
-            position: { x: -2.1, y: 3.6, z: -3 },
-            radius: 2.5,
-            color: new Color(128, 128, 128),
-            specular: 0.0,
-            lambert: 0.8,
-            ambient: 0.3,
-        },
-        {
-            type: "sphere",
-            position: { x: 1.2, y: 2, z: -1 },
-            radius: 1.0,
-            color: new Color(100, 110, 100),
-            specular: 0.999, // high spec object
-            lambert: 0.7,
-            ambient: 0.3,
-        },
-        {
-            type: "sphere",
-            position: { x: 1.1, y: 4.5, z: -0.5 },
-            radius: 1.5,
-            color: new Color(5, 5, 255),
-            specular: 0.5,
-            lambert: 0.8,
-            ambient: 0.2,
-        },
-        {
-            type: "sphere",
-            position: { x: 3.0, y: 6, z: -5 },
-            radius: 4,
-            color: new Color(255, 255, 255),
-            specular: 0.2,
-            lambert: 0.7,
-            ambient: 0.3,
-        },
-        {
-            type: "sphere",
-            position: { x: -0.4, y: 6, z: 0 },
-            radius: 0.5,
-            color: new Color(100, 110, 100),
-            specular: 0.98, // high spec object
-            lambert: 0.8,
-            ambient: 0.3,
-        },
-    ],
-};
-
-// TODO needs big refactor
-class Vec3D {
-    constructor(x, y, z) {
-        [this.x, this.y, this.z] = [x, y, z];
-    }
-    static ZERO = new Vec3D(0, 0, 0);
-    static UP = new Vec3D(0, 1, 0);
-
-    static dot(a, b) {
-        return a.x * b.x + a.y * b.y + a.z * b.z;
-    }
-
-    static cross(a, b) {
-        return {
-            x: a.y * b.z - a.z * b.y,
-            y: a.z * b.x - a.x * b.z,
-            z: a.x * b.y - a.y * b.x
-        };
-    }
-
-    static scale(a, t) {
-        return { x: a.x * t, y: a.y * t, z: a.z * t };
-    }
-
-    static normalise(a) {
-        const length = Math.sqrt(this.dot(a, a));
-        return this.scale(a, 1 / length);
-    }
-
-    static add(a, b) {
-        return { x: a.x + b.x, y: a.y + b.y, z: a.z + b.z };
-    }
-
-    static subtract(a, b) {
-        return { x: a.x - b.x, y: a.y - b.y, z: a.z - b.z };
-    }
-}
-
 
 // TODO this needs a tidy and a rethink
 function traceRay(ray, scene, depth) {
@@ -232,7 +94,7 @@ function computeReflectedColor(ray, scene, object, hitPoint, normal, depth) {
     }
 
     lambertAmount = Math.min(1, lambertAmount);
-    cFinal = new Color(
+    let cFinal = new Color(
         c.r + (b.r * lambertAmount * object.lambert) + (b.r * object.ambient),
         c.g + (b.g * lambertAmount * object.lambert) + (b.g * object.ambient),
         c.b + (b.b * lambertAmount * object.lambert) + (b.b * object.ambient)
@@ -296,61 +158,12 @@ function renderScene(scene) {
     console.log(`Rendered in ${(tDelta).toFixed(1)}ms (${fps.toFixed(0)}fps)`);
 }
 
-function redrawFrame() {
+export function redrawFrame() {
     isRealtime = true;
     renderScene(SCENE);
     requestAnimationFrame(redrawFrame);
 }
 
 renderScene(SCENE);
-
-function expect(value) {
-    return {
-        toBe: function(expected) {
-            if (value !== expected) {
-                throw new Error(`Expected ${expected} but got ${value}`);
-            }
-        },
-        toBeApprox: function(expected, epsilon = 0.00001) {
-            if (Math.abs(value - expected) > epsilon) {
-                throw new Error(`Expected ${expected} but got ${value}`);
-            }
-        },
-        toEqual: function(expected) {
-            if (JSON.stringify(value) !== JSON.stringify(expected)) {
-                throw new Error(`Expected ${JSON.stringify(expected)} but got ${JSON.stringify(value)}`);
-            }
-        }
-    };
-}
-
-function testVec3D() {
-    console.log("Starting Vec3D tests...");
-
-    // Test Vec3D.dot
-    expect(Vec3D.dot(new Vec3D(1, 2, 3), new Vec3D(4, 5, 6))).toBe(32);
-
-    // Test Vec3D.cross
-    const crossResult = Vec3D.cross(new Vec3D(1, 2, 3), new Vec3D(4, 5, 6));
-    expect(crossResult).toEqual({ x: -3, y: 6, z: -3 });
-
-    // Test Vec3D.scale
-    const scaleResult = Vec3D.scale(new Vec3D(1, 2, 3), 2);
-    expect(scaleResult).toEqual({ x: 2, y: 4, z: 6 });
-
-    // Test Vec3D.normalise
-    const normaliseResult = Vec3D.normalise(new Vec3D(3, 4, 0));
-    expect(normaliseResult.x).toBeApprox(0.6);
-    expect(normaliseResult.y).toBeApprox(0.8);
-    expect(normaliseResult.z).toBeApprox(0);
-
-    // Test Vec3D.add
-    expect(Vec3D.add(new Vec3D(1, 2, 3), new Vec3D(4, 5, 6))).toEqual({ x: 5, y: 7, z: 9 });
-
-    // Test Vec3D.subtract
-    expect(Vec3D.subtract(new Vec3D(5, 7, 9), new Vec3D(4, 5, 6))).toEqual({ x: 1, y: 2, z: 3 });
-
-    console.log("All Vec3D tests passed!");
-}
-
-testVec3D();
+runTests();
+userInteraction();
