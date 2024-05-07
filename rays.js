@@ -1,7 +1,7 @@
 const MOVE_MULT = 0.2;
-const SHRINK_FACTOR = 6;
+const SHRINK_FACTOR = 8;
 const REFLECTION_DEPTH = 2;
-const MAX_DIST = 30;
+const MAX_DIST = 20;
 const CANV_WIDTH = Math.round(window.innerWidth / 1.5);
 const CANV_HEIGHT = Math.floor(CANV_WIDTH / 1.78);
 const WIDTH = Math.floor(CANV_WIDTH / SHRINK_FACTOR);
