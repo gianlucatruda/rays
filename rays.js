@@ -1,16 +1,18 @@
 const MOVE_MULT = 0.2;
-const SHRINK_FACTOR = 4;
+const SHRINK_FACTOR = 6;
 const REFLECTION_DEPTH = 2;
 const MAX_DIST = 30;
-const WIDTH = 1920 / SHRINK_FACTOR;
-const HEIGHT = 1080 / SHRINK_FACTOR;
+const CANV_WIDTH = Math.round(window.innerWidth / 1.5);
+const CANV_HEIGHT = Math.round(CANV_WIDTH / 1.78);
+const WIDTH = CANV_WIDTH / SHRINK_FACTOR;
+const HEIGHT = CANV_HEIGHT / SHRINK_FACTOR;
 
 const canvas = document.getElementById('canvas');
 const fpsText = document.getElementById('fps-text');
 const ctx = canvas.getContext('2d');
 
-[canvas.width, canvas.height] = [WIDTH, HEIGHT];
-const canvasImg = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+[canvas.width, canvas.height] = [CANV_WIDTH, CANV_HEIGHT];
+const canvasImg = ctx.getImageData(0, 0, CANV_WIDTH, CANV_HEIGHT);
 
 let isRealtime = false;
 let trackingMouse = false;
@@ -256,11 +258,16 @@ function renderScene(scene) {
             };
 
             const colorVec = traceRay(ray, scene, 0);
-            const index = x * 4 + y * WIDTH * 4;
-            canvasImg.data[index + 0] = colorVec.r;
-            canvasImg.data[index + 1] = colorVec.g;
-            canvasImg.data[index + 2] = colorVec.b;
-            canvasImg.data[index + 3] = 255;
+            for (let scY = 0; scY < SHRINK_FACTOR; scY++) {
+                for (let scX = 0; scX < SHRINK_FACTOR; scX++) {
+                    // Scaling from implicit screen to actual canvas size
+                    const index = ((SHRINK_FACTOR * x + scX) * 4) + ((SHRINK_FACTOR * y + scY) * CANV_WIDTH * 4);
+                    canvasImg.data[index + 0] = colorVec.r;
+                    canvasImg.data[index + 1] = colorVec.g;
+                    canvasImg.data[index + 2] = colorVec.b;
+                    canvasImg.data[index + 3] = 255;
+                }
+            }
         }
     }
     ctx.putImageData(canvasImg, 0, 0);
