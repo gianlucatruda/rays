@@ -3,9 +3,9 @@ const SHRINK_FACTOR = 6;
 const REFLECTION_DEPTH = 2;
 const MAX_DIST = 30;
 const CANV_WIDTH = Math.round(window.innerWidth / 1.5);
-const CANV_HEIGHT = Math.round(CANV_WIDTH / 1.78);
-const WIDTH = CANV_WIDTH / SHRINK_FACTOR;
-const HEIGHT = CANV_HEIGHT / SHRINK_FACTOR;
+const CANV_HEIGHT = Math.floor(CANV_WIDTH / 1.78);
+const WIDTH = Math.floor(CANV_WIDTH / SHRINK_FACTOR);
+const HEIGHT = Math.ceil(CANV_HEIGHT / SHRINK_FACTOR);
 
 const canvas = document.getElementById('canvas');
 const fpsText = document.getElementById('fps-text');
@@ -261,7 +261,7 @@ function renderScene(scene) {
             for (let scY = 0; scY < SHRINK_FACTOR; scY++) {
                 for (let scX = 0; scX < SHRINK_FACTOR; scX++) {
                     // Scaling from implicit screen to actual canvas size
-                    const index = ((SHRINK_FACTOR * x + scX) * 4) + ((SHRINK_FACTOR * y + scY) * CANV_WIDTH * 4);
+                    const index = (SHRINK_FACTOR * x + scX) * 4 + (SHRINK_FACTOR * y + scY) * CANV_WIDTH * 4;
                     canvasImg.data[index + 0] = colorVec.r;
                     canvasImg.data[index + 1] = colorVec.g;
                     canvasImg.data[index + 2] = colorVec.b;
