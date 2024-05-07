@@ -32,7 +32,7 @@ function traceRay(ray, scene, depth) {
     if (depth > REFLECTION_DEPTH) return;
     const hit = firstIntersect(ray, scene);
     if (hit.dist > MAX_DIST) return new Color(255, 255, 255);
-    const hitPoint = Vec3D.add(ray.position, Vec3D.scale(ray.vector, hit.dist));
+    const hitPoint = Vec3D.add(ray.position, ray.vector.scale(hit.dist));
     const reflecNorm = Vec3D.normalise(Vec3D.subtract(hitPoint, hit.object.shape.position));
     // TODO generalise to nonspheres, also "sphere of concern" lol
     let object = hit.object
@@ -55,8 +55,10 @@ function traceRay(ray, scene, depth) {
         }
     }
     if (object.specular) {
-        let reflectedVec = Vec3D.scale(reflecNorm, Vec3D.dot(ray.vector, reflecNorm));
-        reflectedVec = Vec3D.subtract(Vec3D.scale(reflectedVec, 2), ray.vector);
+        let reflectedVec = reflecNorm.scale(Vec3D.dot(ray.vector, reflecNorm));
+        reflectedVec = Vec3D.subtract(
+            reflectedVec.scale(2),
+            ray.vector);
         const reflectedRay = {
             position: hitPoint,
             vector: reflectedVec,
@@ -106,8 +108,8 @@ function renderScene(scene) {
 
     for (let x = 0; x < WIDTH; x++) {
         for (let y = 0; y < HEIGHT; y++) {
-            const xComp = Vec3D.scale(vpRight, x * pixelWidth - halfWidth);
-            const yComp = Vec3D.scale(vpUp, y * pixelHeight - halfHeight);
+            const xComp = vpRight.scale(x * pixelWidth - halfWidth);
+            const yComp = vpUp.scale(y * pixelHeight - halfHeight);
             const ray = {
                 position: camera.position,
                 vector: Vec3D.normalise(Vec3D.add(Vec3D.add(eyeVector, xComp), yComp))

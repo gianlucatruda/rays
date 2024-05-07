@@ -35,6 +35,11 @@ function testVec3D() {
     const scaleResult = Vec3D.scale(new Vec3D(1, 2, 3), 2);
     expect(scaleResult).toEqual({ x: 2, y: 4, z: 6 });
 
+    // Test new Vec3D.scale
+    const someVec = new Vec3D(1, 2, 3);
+    let scaleVec = someVec.scale(3);
+    expect(scaleVec).toEqual({x: 3, y: 6, z: 9});
+
     // Test Vec3D.normalise
     const normaliseResult = Vec3D.normalise(new Vec3D(3, 4, 0));
     expect(normaliseResult.x).toBeApprox(0.6);

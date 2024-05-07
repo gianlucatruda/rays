@@ -22,6 +22,10 @@ export class Vec3D {
         return new Vec3D(a.x * t, a.y * t, a.z * t);
     }
 
+    scale(m) {
+        return new Vec3D(this.x * m, this.y * m, this.z * m);
+    }
+
     static normalise(a) {
         const length = Math.sqrt(this.dot(a, a));
         return this.scale(a, 1 / length);
