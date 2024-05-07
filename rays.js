@@ -30,15 +30,52 @@ export const camera = {
 // TODO this needs a tidy and a rethink
 function traceRay(ray, scene, depth) {
     if (depth > REFLECTION_DEPTH) return;
-    const hit = getFirstCollision(ray, scene);
+    const hit = firstIntersect(ray, scene);
     if (hit.dist > MAX_DIST) return new Color(255, 255, 255);
     const hitPoint = Vec3D.add(ray.position, Vec3D.scale(ray.vector, hit.dist));
     // TODO generalise to nonspheres, also "sphere of concern" lol
     const reflecNorm = Vec3D.normalise(Vec3D.subtract(hitPoint, hit.object.position));
-    return computeReflectedColor(ray, scene, hit.object, hitPoint, reflecNorm, depth);
+    let object = hit.object
+    const b = object.color;
+    let c = new Color(0, 0, 0);
+    let lambertAmount = 0;
+    if (object.lambert) {
+        for (const light of scene.lights) {
+            let hitFromLight = firstIntersect({
+                position: hitPoint,
+                vector: Vec3D.normalise(Vec3D.subtract(hitPoint, light)),
+            }, scene);
+            if (hitFromLight.dist < -0.005) continue; // Light source not visible
+            let contribution = Vec3D.dot(
+                Vec3D.normalise(Vec3D.subtract(light, hitPoint)),
+                reflecNorm);
+            if (contribution > 0) {
+                lambertAmount += contribution;
+            }
+        }
+    }
+    if (object.specular) {
+        let reflectedVec = Vec3D.scale(reflecNorm, Vec3D.dot(ray.vector, reflecNorm));
+        reflectedVec = Vec3D.subtract(Vec3D.scale(reflectedVec, 2), ray.vector);
+        const reflectedRay = {
+            position: hitPoint,
+            vector: reflectedVec,
+        };
+        const reflectedColor = traceRay(reflectedRay, scene, ++depth);
+        if (reflectedColor) {
+            c = c.add(reflectedColor.scaleBy(object.specular));
+        }
+    }
+    lambertAmount = Math.min(1, lambertAmount);
+    let cFinal = new Color(
+        c.r + (b.r * lambertAmount * object.lambert) + (b.r * object.ambient),
+        c.g + (b.g * lambertAmount * object.lambert) + (b.g * object.ambient),
+        c.b + (b.b * lambertAmount * object.lambert) + (b.b * object.ambient)
+    );
+    return cFinal;
 }
 
-function getFirstCollision(ray, scene) {
+function firstIntersect(ray, scene) {
     let hit = { 'dist': Infinity, 'object': null };
     for (const object of scene.objects) {
         if (object.type != "sphere") console.warn(`Could not render unsuported '${object.type}' object.`);
@@ -58,60 +95,9 @@ function getSphereHit(sphere, ray) {
     const eyeToCenter = Vec3D.subtract(sphere.position, ray.position);
     const v = Vec3D.dot(eyeToCenter, ray.vector);
     const eoDot = Vec3D.dot(eyeToCenter, eyeToCenter);
-    const discriminant = Math.pow(sphere.radius, 2) - eoDot + v * v;
+    const discriminant = sphere.radius ** 2 - eoDot + v ** 2;
     if (discriminant < 0) return;
     return v - Math.sqrt(discriminant);
-}
-
-// TODO needs major refactor. a total mess
-function computeReflectedColor(ray, scene, object, hitPoint, normal, depth) {
-    const b = object.color;
-    let c = new Color(0, 0, 0);
-    let lambertAmount = 0;
-    if (object.lambert) {
-        for (const light of scene.lights) {
-            if (!isLightVisible(hitPoint, scene, light)) continue;
-            let contribution = Vec3D.dot(
-                Vec3D.normalise(Vec3D.subtract(light, hitPoint)),
-                normal);
-            if (contribution > 0) {
-                lambertAmount += contribution;
-            }
-        }
-    }
-
-    if (object.specular) {
-        let reflectedVec = Vec3D.scale(normal, Vec3D.dot(ray.vector, normal));
-        reflectedVec = Vec3D.subtract(Vec3D.scale(reflectedVec, 2), ray.vector);
-        const reflectedRay = {
-            position: hitPoint,
-            vector: reflectedVec,
-        };
-        const reflectedColor = traceRay(reflectedRay, scene, ++depth);
-        if (reflectedColor) {
-            c = c.add(reflectedColor.scaleBy(object.specular));
-        }
-    }
-
-    lambertAmount = Math.min(1, lambertAmount);
-    let cFinal = new Color(
-        c.r + (b.r * lambertAmount * object.lambert) + (b.r * object.ambient),
-        c.g + (b.g * lambertAmount * object.lambert) + (b.g * object.ambient),
-        c.b + (b.b * lambertAmount * object.lambert) + (b.b * object.ambient)
-    );
-    return cFinal;
-}
-
-// TODO refactor
-function isLightVisible(pt, scene, light) {
-    let hitFromLight = getFirstCollision(
-        {
-            position: pt,
-            vector: Vec3D.normalise(Vec3D.subtract(pt, light)),
-        },
-        scene
-    );
-    return hitFromLight.dist > -0.005;
 }
 
 
