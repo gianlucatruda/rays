@@ -74,11 +74,13 @@ function traceRay(ray, scene, depth) {
             }
         }
     }
+    lambertAmount = Math.min(1, lambertAmount);
     if (object.specular) {
         let reflectedVec = reflecNorm.scale(Vec3D.dot(ray.vector, reflecNorm));
         reflectedVec = Vec3D.subtract(
-            reflectedVec.scale(2),
-            ray.vector);
+            reflectedVec.scale(2.0), // TODO extract as constant
+            ray.vector
+        );
         const reflectedRay = new Ray(
             hitPoint,
             reflectedVec,
@@ -88,7 +90,6 @@ function traceRay(ray, scene, depth) {
             newColor = newColor.add(reflectedColor.scaleBy(object.specular));
         }
     }
-    lambertAmount = Math.min(1, lambertAmount);
     let cFinal = new Color(
         newColor.r + (objColor.r * lambertAmount * object.lambert) + (objColor.r * object.ambient),
         newColor.g + (objColor.g * lambertAmount * object.lambert) + (objColor.g * object.ambient),

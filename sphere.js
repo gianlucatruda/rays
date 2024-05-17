@@ -11,9 +11,9 @@ export class Sphere {
         const a = Vec3D.dot(ray.vector, ray.vector);
         const h = Vec3D.dot(ray.vector, oc);
         const c = Vec3D.dot(oc, oc) - this.radius ** 2;
-        let discriminant = h * h - a * c;
+        let discriminant = h ** 2 - a * c;
 
-        if (discriminant < 0) return undefined;
+        if (discriminant < 0) return;
         return (h - Math.sqrt(discriminant)) / a;
     }
 

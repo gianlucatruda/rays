@@ -10,21 +10,21 @@ export const SCENE = {
             shape: new Sphere([0, 0, 0], 1),
             color: new Color(200, 200, 200),
             specular: 0.99,
-            lambert: 0.8,
+            lambert: 0.5,
             ambient: 0.1,
         },
         {
             shape: new Sphere([-2, 0, 0], 1),
             color: new Color(50, 50, 50),
             specular: 0.999, // high spec object
-            lambert: 0.9,
+            lambert: 0.5,
             ambient: 0.01,
         },
         {
             shape: new Sphere([2, 0, 0], 1),
             color: new Color(128, 128, 128),
             specular: 0.01,
-            lambert: 0.99,
+            lambert: 0.5,
             ambient: 0.99,
         },
         {
