@@ -45,8 +45,14 @@ function testVec3D() {
     // Test Vec3D.add
     expect(Vec3D.add(new Vec3D(1, 2, 3), new Vec3D(4, 5, 6))).toEqual({ x: 5, y: 7, z: 9 });
 
+    // Test Vec3D.plus
+    expect(new Vec3D(1, 2, 3).plus(new Vec3D(4, 5, 6))).toEqual({x: 5, y: 7, z: 9});
+
     // Test Vec3D.subtract
     expect(Vec3D.subtract(new Vec3D(5, 7, 9), new Vec3D(4, 5, 6))).toEqual({ x: 1, y: 2, z: 3 });
+
+    // Test Vec3D.minus
+    expect(new Vec3D(5, 7, 9).minus(new Vec3D(4, 5, 6))).toEqual({ x: 1, y: 2, z: 3});
 
     console.log("All Vec3D tests passed!");
 }

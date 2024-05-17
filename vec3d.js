@@ -32,8 +32,16 @@ export class Vec3D {
         return new Vec3D(a.x + b.x, a.y + b.y, a.z + b.z);
     }
 
+    plus(b) {
+        return new Vec3D(this.x + b.x, this.y + b.y, this.z + b.z);
+    }
+
     static subtract(a, b) {
         return new Vec3D(a.x - b.x, a.y - b.y, a.z - b.z);
+    }
+
+    minus(b) {
+        return new Vec3D(this.x - b.x, this.y - b.y, this.z - b.z);
     }
 }
 
