@@ -8,9 +8,10 @@ import { Vec3D } from "./vec3d.js";
 export const MOVE_MULT = 0.2;
 const SHRINK_FACTOR = 6;
 const MAX_REFL_DEPTH = 3;
-const MAX_DIST = 40;
+const MAX_DIST = 30;
 const CANV_WIDTH = Math.round(window.innerWidth / 1.5);
 const CANV_HEIGHT = Math.floor(CANV_WIDTH / 1.78);
+const SKY = new Color(128+40, 178+40, 255);
 
 const canvas = document.getElementById('canvas');
 [canvas.width, canvas.height] = [CANV_WIDTH, CANV_HEIGHT];
@@ -31,9 +32,9 @@ export function setRealtime(b) {
 }
 
 export const camera = {
-    position: { x: -0.2, y: 2.0, z: 10 },
-    fov: 45,
-    vector: { x: 0, y: 3, z: 0 },
+    position: { x: 5.5, y: -1, z: 3.5 },
+    fov: 50,
+    vector: { x: -2.2, y: 1.0, z: 0 },
 };
 
 class Ray {
@@ -50,7 +51,7 @@ function traceRay(ray, scene, depth) {
     if (depth > max_depth) return;
 
     const hit = firstIntersect(ray, scene);
-    if (hit.dist > MAX_DIST) return new Color(200, 200, 200);
+    if (hit.dist > MAX_DIST) return SKY;
     const hitPoint = Vec3D.add(ray.origin, ray.vector.scale(hit.dist));
     const reflecNorm = Vec3D.subtract(hitPoint, hit.object.shape.origin).norm();
     // TODO generalise to nonspheres, also "sphere of concern" lol
@@ -163,6 +164,7 @@ function renderScene(scene) {
     fpsText.innerText = fps.toFixed(0) + "fps";
     resText.innerText = `${WIDTH} x ${HEIGHT}`;
     if (!isRealtime) console.log(`Rendered in ${(tDelta).toFixed(1)}ms (${fps.toFixed(0)}fps)`);
+    console.log({camera});
 }
 
 export function redrawFrame() {

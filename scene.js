@@ -2,42 +2,79 @@ import { Color } from "./color.js";
 import { Sphere } from "./sphere.js";
 
 export const SCENE = {
-    lights: [{ x: -40, y: -10, z: 40 }],
+    lights: [
+        { x: 0, y: -10, z: 30 },
+    ],
     objects: [
         {
-            shape: new Sphere([-2.1, 3.6, -3], 2.5),
-            color: new Color(128, 128, 128),
-            specular: 0,
+            shape: new Sphere([0, 0, 0], 1),
+            color: new Color(200, 200, 200),
+            specular: 0.99,
             lambert: 0.8,
-            ambient: 0.3,
+            ambient: 0.1,
         },
         {
-            shape: new Sphere([1.2, 2, -1], 1),
-            color: new Color(100, 110, 100),
+            shape: new Sphere([-2, 0, 0], 1),
+            color: new Color(50, 50, 50),
             specular: 0.999, // high spec object
-            lambert: 0.7,
-            ambient: 0.3,
+            lambert: 0.9,
+            ambient: 0.01,
         },
         {
-            shape: new Sphere([1.1, 4.5, -0.5], 1.5),
-            color: new Color(5, 5, 255),
-            specular: 0.5,
+            shape: new Sphere([2, 0, 0], 1),
+            color: new Color(128, 128, 128),
+            specular: 0.01,
+            lambert: 0.99,
+            ambient: 0.99,
+        },
+        {
+            shape: new Sphere([0, 0.5, 1.7], 0.5),
+            color: new Color(200, 50, 50),
+            specular: 0.001,
             lambert: 0.8,
-            ambient: 0.2,
+            ambient: 0.8,
         },
         {
-            shape: new Sphere([3, 6, -5], 4),
-            color: new Color(255, 255, 255),
-            specular: 0.2,
-            lambert: 0.7,
-            ambient: 0.3,
-        },
-        {
-            shape: new Sphere([-0.4, 6, 0], 0.5),
-            color: new Color(100, 110, 100),
-            specular: 0.98, // high spec object
+            shape: new Sphere([-1, 0.5, 1.7], 0.5),
+            color: new Color(50, 200, 50),
+            specular: 0.001,
             lambert: 0.8,
-            ambient: 0.3,
+            ambient: 0.8,
+        },
+        {
+            shape: new Sphere([1, 0.5, 1.7], 0.5),
+            color: new Color(50, 50, 200),
+            specular: 0.001,
+            lambert: 0.8,
+            ambient: 0.8,
+        },
+        {
+            shape: new Sphere([0, 0.75, 2.5], 0.25),
+            color: new Color(50, 50, 50),
+            specular: 0.9,
+            lambert: 0.8,
+            ambient: 0.8,
+        },
+        {
+            shape: new Sphere([-1, 0.75, 2.5], 0.25),
+            color: new Color(50, 50, 200),
+            specular: 0.001,
+            lambert: 0.8,
+            ambient: 0.8,
+        },
+        {
+            shape: new Sphere([1, 0.75, 2.5], 0.25),
+            color: new Color(50, 200, 50),
+            specular: 0.001,
+            lambert: 0.8,
+            ambient: 0.8,
+        },
+        {
+            shape: new Sphere([0, 100.99, 0], 100),
+            color: new Color(100, 100, 100),
+            specular: 0.1,
+            lambert: 0.8,
+            ambient: 0.8,
         },
     ],
 };
