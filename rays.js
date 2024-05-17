@@ -1,12 +1,12 @@
-import { Sphere } from "./sphere.js";
 import { Color } from "./color.js";
 import { SCENE } from "./scene.js";
+import { Sphere } from "./sphere.js";
 import { runTests } from "./tests.js";
 import { userInteraction } from "./userInteraction.js";
 import { Vec3D } from "./vec3d.js";
 
 export const MOVE_MULT = 0.2;
-const SHRINK_FACTOR = 6;
+const SHRINK_FACTOR = 2;
 const REFLECTION_DEPTH = 2;
 const MAX_DIST = 20;
 const CANV_WIDTH = Math.round(window.innerWidth / 1.5);
@@ -27,13 +27,20 @@ export const camera = {
     vector: { x: 0, y: 3, z: 0 },
 };
 
+class Ray {
+    constructor(orig, vect) {
+        this.origin = new Vec3D(orig.x, orig.y, orig.z);
+        this.vector = new Vec3D(vect.x, vect.y, vect.z);
+    }
+}
+
 // TODO this needs a major tidy and a rethink
 function traceRay(ray, scene, depth) {
     if (depth > REFLECTION_DEPTH) return;
     const hit = firstIntersect(ray, scene);
-    if (hit.dist > MAX_DIST) return new Color(255, 255, 255);
-    const hitPoint = Vec3D.add(ray.position, ray.vector.scale(hit.dist));
-    const reflecNorm = Vec3D.subtract(hitPoint, hit.object.shape.position).norm();
+    if (hit.dist > MAX_DIST) return new Color(200, 200, 200);
+    const hitPoint = Vec3D.add(ray.origin, ray.vector.scale(hit.dist));
+    const reflecNorm = Vec3D.subtract(hitPoint, hit.object.shape.origin).norm();
     // TODO generalise to nonspheres, also "sphere of concern" lol
     let object = hit.object
     const objColor = object.color;
@@ -41,10 +48,10 @@ function traceRay(ray, scene, depth) {
     let lambertAmount = 0;
     if (object.lambert) {
         for (const light of scene.lights) {
-            let hitFromLight = firstIntersect({
-                position: hitPoint,
-                vector: Vec3D.subtract(hitPoint, light).norm(),
-            }, scene);
+            let hitFromLight = firstIntersect(new Ray(
+                hitPoint,
+                Vec3D.subtract(hitPoint, light).norm(),
+            ), scene);
             if (hitFromLight.dist < -0.005) continue; // Light source not visible
             let contribution = Vec3D.dot(
                 Vec3D.subtract(light, hitPoint).norm(),
@@ -59,10 +66,10 @@ function traceRay(ray, scene, depth) {
         reflectedVec = Vec3D.subtract(
             reflectedVec.scale(2),
             ray.vector);
-        const reflectedRay = {
-            position: hitPoint,
-            vector: reflectedVec,
-        };
+        const reflectedRay = new Ray(
+            hitPoint,
+            reflectedVec,
+        );
         const reflectedColor = traceRay(reflectedRay, scene, ++depth);
         if (reflectedColor) {
             newColor = newColor.add(reflectedColor.scaleBy(object.specular));
@@ -80,7 +87,7 @@ function traceRay(ray, scene, depth) {
 function firstIntersect(ray, scene) {
     let hit = { 'dist': Infinity, 'object': null };
     for (const object of scene.objects) {
-        let dist = null;
+        let dist = undefined;
         if (object.shape instanceof Sphere) {
             dist = object.shape.getIntersect(ray);
         } else console.warn(`Objects of type ${object.shape} not supported yet.`);
@@ -110,10 +117,10 @@ function renderScene(scene) {
         for (let y = 0; y < HEIGHT; y++) {
             const xComp = vpRight.scale(x * pixelWidth - halfWidth);
             const yComp = vpUp.scale(y * pixelHeight - halfHeight);
-            const ray = {
-                position: camera.position,
-                vector: Vec3D.add(Vec3D.add(eyeVector, xComp), yComp).norm()
-            };
+            const ray = new Ray(
+                camera.position,
+                Vec3D.add(Vec3D.add(eyeVector, xComp), yComp).norm()
+            );
             const colorVec = traceRay(ray, scene, 0);
             for (let scY = 0; scY < SHRINK_FACTOR; scY++) {
                 for (let scX = 0; scX < SHRINK_FACTOR; scX++) {
