@@ -6,21 +6,30 @@ import { userInteraction } from "./userInteraction.js";
 import { Vec3D } from "./vec3d.js";
 
 export const MOVE_MULT = 0.2;
-const SHRINK_FACTOR = 2;
-const REFLECTION_DEPTH = 2;
-const MAX_DIST = 20;
+const SHRINK_FACTOR = 6;
+const MAX_REFL_DEPTH = 3;
+const MAX_DIST = 40;
 const CANV_WIDTH = Math.round(window.innerWidth / 1.5);
 const CANV_HEIGHT = Math.floor(CANV_WIDTH / 1.78);
-const WIDTH = Math.floor(CANV_WIDTH / SHRINK_FACTOR);
-const HEIGHT = Math.ceil(CANV_HEIGHT / SHRINK_FACTOR);
 
 const canvas = document.getElementById('canvas');
 [canvas.width, canvas.height] = [CANV_WIDTH, CANV_HEIGHT];
 const fpsText = document.getElementById('fps-text');
+const resText = document.getElementById('res-text');
 const ctx = canvas.getContext('2d');
 const canvasImg = ctx.getImageData(0, 0, CANV_WIDTH, CANV_HEIGHT);
 
 export let isRealtime = false;
+let prev_shrink = SHRINK_FACTOR;
+
+export function setRealtime(b) {
+    if (!b instanceof Boolean) {
+        console.log("Can't use setRealtime with non Bool").
+            return;
+    }
+    isRealtime = b;
+}
+
 export const camera = {
     position: { x: -0.2, y: 2.0, z: 10 },
     fov: 45,
@@ -36,7 +45,10 @@ class Ray {
 
 // TODO this needs a major tidy and a rethink
 function traceRay(ray, scene, depth) {
-    if (depth > REFLECTION_DEPTH) return;
+    let max_depth = MAX_REFL_DEPTH;
+    if (isRealtime) max_depth = 2;
+    if (depth > max_depth) return;
+
     const hit = firstIntersect(ray, scene);
     if (hit.dist > MAX_DIST) return new Color(200, 200, 200);
     const hitPoint = Vec3D.add(ray.origin, ray.vector.scale(hit.dist));
@@ -101,7 +113,17 @@ function firstIntersect(ray, scene) {
 
 
 function renderScene(scene) {
+    // Don't do anything if already fully rendered
+    if (prev_shrink <= 1 && !isRealtime) return;
+
     const tStart = performance.now();
+
+    let shrink = Math.floor(prev_shrink - 1);
+    if (isRealtime) shrink = SHRINK_FACTOR;
+    prev_shrink = shrink;
+
+    const WIDTH = Math.floor(CANV_WIDTH / shrink);
+    const HEIGHT = Math.ceil(CANV_HEIGHT / shrink);
 
     // TODO refactor these
     const eyeVector = Vec3D.subtract(camera.vector, camera.position).norm();
@@ -122,10 +144,10 @@ function renderScene(scene) {
                 Vec3D.add(Vec3D.add(eyeVector, xComp), yComp).norm()
             );
             const colorVec = traceRay(ray, scene, 0);
-            for (let scY = 0; scY < SHRINK_FACTOR; scY++) {
-                for (let scX = 0; scX < SHRINK_FACTOR; scX++) {
+            for (let scY = 0; scY < shrink; scY++) {
+                for (let scX = 0; scX < shrink; scX++) {
                     // Scaling from implicit screen to actual canvas size
-                    const index = (SHRINK_FACTOR * x + scX) * 4 + (SHRINK_FACTOR * y + scY) * CANV_WIDTH * 4;
+                    const index = (shrink * x + scX) * 4 + (shrink * y + scY) * CANV_WIDTH * 4;
                     canvasImg.data[index + 0] = colorVec.r;
                     canvasImg.data[index + 1] = colorVec.g;
                     canvasImg.data[index + 2] = colorVec.b;
@@ -138,16 +160,17 @@ function renderScene(scene) {
 
     let tDelta = performance.now() - tStart;
     let fps = 1 / (tDelta / 1000);
-    if (isRealtime) fpsText.innerText = fps.toFixed(0) + "fps";
+    fpsText.innerText = fps.toFixed(0) + "fps";
+    resText.innerText = `${WIDTH} x ${HEIGHT}`;
     if (!isRealtime) console.log(`Rendered in ${(tDelta).toFixed(1)}ms (${fps.toFixed(0)}fps)`);
 }
 
 export function redrawFrame() {
-    isRealtime = true;
     renderScene(SCENE);
-    requestAnimationFrame(redrawFrame);
+    window.requestAnimationFrame(redrawFrame);
 }
 
-renderScene(SCENE);
 runTests();
+renderScene(SCENE);
 userInteraction();
+redrawFrame();
