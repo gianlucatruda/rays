@@ -33,7 +33,7 @@ function traceRay(ray, scene, depth) {
     const hit = firstIntersect(ray, scene);
     if (hit.dist > MAX_DIST) return new Color(255, 255, 255);
     const hitPoint = Vec3D.add(ray.position, ray.vector.scale(hit.dist));
-    const reflecNorm = Vec3D.normalise(Vec3D.subtract(hitPoint, hit.object.shape.position));
+    const reflecNorm = Vec3D.subtract(hitPoint, hit.object.shape.position).norm();
     // TODO generalise to nonspheres, also "sphere of concern" lol
     let object = hit.object
     const objColor = object.color;
@@ -43,11 +43,11 @@ function traceRay(ray, scene, depth) {
         for (const light of scene.lights) {
             let hitFromLight = firstIntersect({
                 position: hitPoint,
-                vector: Vec3D.normalise(Vec3D.subtract(hitPoint, light)),
+                vector: Vec3D.subtract(hitPoint, light).norm(),
             }, scene);
             if (hitFromLight.dist < -0.005) continue; // Light source not visible
             let contribution = Vec3D.dot(
-                Vec3D.normalise(Vec3D.subtract(light, hitPoint)),
+                Vec3D.subtract(light, hitPoint).norm(),
                 reflecNorm);
             if (contribution > 0) {
                 lambertAmount += contribution;
@@ -97,9 +97,9 @@ function renderScene(scene) {
     const tStart = performance.now();
 
     // TODO refactor these
-    const eyeVector = Vec3D.normalise(Vec3D.subtract(camera.vector, camera.position));
-    const vpRight = Vec3D.normalise(Vec3D.cross(eyeVector, Vec3D.UP));
-    const vpUp = Vec3D.normalise(Vec3D.cross(vpRight, eyeVector));
+    const eyeVector = Vec3D.subtract(camera.vector, camera.position).norm();
+    const vpRight = Vec3D.cross(eyeVector, Vec3D.UP).norm();
+    const vpUp = Vec3D.cross(vpRight, eyeVector).norm();
     const fovRad = Math.PI * (camera.fov / 2) / 180;
     const halfWidth = Math.tan(fovRad);
     const halfHeight = HEIGHT / WIDTH * halfWidth;
@@ -112,7 +112,7 @@ function renderScene(scene) {
             const yComp = vpUp.scale(y * pixelHeight - halfHeight);
             const ray = {
                 position: camera.position,
-                vector: Vec3D.normalise(Vec3D.add(Vec3D.add(eyeVector, xComp), yComp))
+                vector: Vec3D.add(Vec3D.add(eyeVector, xComp), yComp).norm()
             };
             const colorVec = traceRay(ray, scene, 0);
             for (let scY = 0; scY < SHRINK_FACTOR; scY++) {
