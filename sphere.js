@@ -1,4 +1,5 @@
 import { Vec3D } from "./vec3d.js";
+const [tMin, tMax] = [0.0000001, 100000];
 
 export class Sphere {
     constructor([x, y, z], r) {
@@ -14,7 +15,14 @@ export class Sphere {
         let discriminant = h ** 2 - a * c;
 
         if (discriminant < 0) return;
-        return (h - Math.sqrt(discriminant)) / a;
+        const sqrtDisc = Math.sqrt(discriminant);
+        let root = (h - sqrtDisc) / a;
+        if (root <= tMin || root >= tMax) {
+            root = (h + sqrtDisc) / a;
+            if (root <= tMin || root >= tMax) return;
+        }
+        return root;
+
     }
 
 }

@@ -7,11 +7,11 @@ import { Vec3D } from "./vec3d.js";
 
 export const MOVE_MULT = 0.2;
 const SHRINK_FACTOR = 6;
-const MAX_REFL_DEPTH = 3;
-const MAX_DIST = 30;
+const MAX_REFL_DEPTH = 5;
+const MAX_DIST = 300;
 const CANV_WIDTH = Math.round(window.innerWidth / 1.5);
 const CANV_HEIGHT = Math.floor(CANV_WIDTH / 1.78);
-const SKY = new Color(128+40, 178+40, 255);
+const SKY = new Color(128 + 40, 178 + 40, 255);
 
 const canvas = document.getElementById('canvas');
 [canvas.width, canvas.height] = [CANV_WIDTH, CANV_HEIGHT];
@@ -76,10 +76,11 @@ function traceRay(ray, scene, depth) {
     }
     lambertAmount = Math.min(1, lambertAmount);
     if (object.specular) {
-        let reflectedVec = reflecNorm.scale(Vec3D.dot(ray.vector, reflecNorm));
-        reflectedVec = Vec3D.subtract(
-            reflectedVec.scale(2.0), // TODO extract as constant
-            ray.vector
+        // https://raytracing.github.io/books/RayTracingInOneWeekend.html#metal/mirroredlightreflection
+        // `reflect = v - 2*dot(v,n)*n`
+        let reflectedVec = Vec3D.subtract(
+            ray.vector,
+            reflecNorm.scale(2 * Vec3D.dot(ray.vector, reflecNorm)),
         );
         const reflectedRay = new Ray(
             hitPoint,
@@ -165,7 +166,7 @@ function renderScene(scene) {
     fpsText.innerText = fps.toFixed(0) + "fps";
     resText.innerText = `${WIDTH} x ${HEIGHT}`;
     if (!isRealtime) console.log(`Rendered in ${(tDelta).toFixed(1)}ms (${fps.toFixed(0)}fps)`);
-    console.log({camera});
+    // console.log({camera});
 }
 
 export function redrawFrame() {
