@@ -25,18 +25,21 @@ export function userInteraction() {
         switch (e.key) {
             case 'w':
                 camera.position.z += -1 * MOVE_MULT;
+                setRealtime(true);
                 break;
             case 's':
                 camera.position.z += 1 * MOVE_MULT;
+                setRealtime(true);
                 break;
             case 'a':
                 camera.position.x += -1 * MOVE_MULT;
+                setRealtime(true);
                 break;
             case 'd':
                 camera.position.x += 1 * MOVE_MULT;
+                setRealtime(true);
                 break;
         }
-        setRealtime(true);
     });
     document.addEventListener('keyup', function(e) {
         setRealtime(false);
