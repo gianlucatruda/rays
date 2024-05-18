@@ -1,4 +1,3 @@
-// TODO needs big refactor
 export class Vec3D {
     constructor(x, y, z) {
         [this.x, this.y, this.z] = [x, y, z];

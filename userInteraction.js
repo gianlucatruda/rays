@@ -1,4 +1,4 @@
-import { MOVE_MULT, camera, setRealtime } from "./rays.js";
+import { MOVE_MULT, camera, setRealtime } from "./main.js";
 
 export function userInteraction() {
     let trackingMouse = false;
