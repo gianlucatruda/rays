@@ -44,17 +44,16 @@ class Ray {
     }
 }
 
-// TODO this needs a major tidy and a rethink
 function traceRay(ray, scene, depth) {
     let max_depth = MAX_REFL_DEPTH;
-    if (isRealtime) max_depth = 2;
+    if (isRealtime) max_depth = 0;
     if (depth > max_depth) return;
 
     const hit = firstIntersect(ray, scene);
+
     if (hit.dist > MAX_DIST) return SKY;
     const hitPoint = Vec3D.add(ray.origin, ray.vector.scale(hit.dist));
     const reflecNorm = Vec3D.subtract(hitPoint, hit.object.shape.origin).norm();
-    // TODO generalise to nonspheres, also "sphere of concern" lol
     let object = hit.object
     const objColor = object.color;
     let newColor = new Color(0, 0, 0);

@@ -1,5 +1,5 @@
 import { Vec3D } from "./vec3d.js";
-const [tMin, tMax] = [0.0000001, 100000];
+const [tMin, tMax] = [0.0000001, 1000];
 
 export class Sphere {
     constructor([x, y, z], r) {
