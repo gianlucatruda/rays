@@ -85,9 +85,9 @@ function traceRay(ray, scene, depth) {
             hitPoint,
             reflectedVec,
         );
-        const reflectedColor = traceRay(reflectedRay, scene, ++depth);
+        const reflectedColor = traceRay(reflectedRay, scene, depth+1);
         if (reflectedColor) {
-            newColor = newColor.add(reflectedColor.scaleBy(object.specular));
+            newColor = Color.add(newColor, reflectedColor.scaleBy(object.specular));
         }
     }
     let cFinal = new Color(

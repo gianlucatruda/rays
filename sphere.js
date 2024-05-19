@@ -1,12 +1,11 @@
 import { Vec3D } from "./vec3d.js";
-const [tMin, tMax] = [0.0000001, 1000];
 
 export class Sphere {
     constructor([x, y, z], r) {
         this.origin = { x: x, y: y, z: z };
         this.radius = r;
     }
-    getIntersect(ray) {
+    getIntersect(ray, tMin = -1000, tMax = 1000) {
         // https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/simplifyingtheray-sphereintersectioncode
         const oc = Vec3D.subtract(this.origin, ray.origin);
         const a = Vec3D.dot(ray.vector, ray.vector);
@@ -17,6 +16,7 @@ export class Sphere {
         if (discriminant < 0) return;
         const sqrtDisc = Math.sqrt(discriminant);
         let root = (h - sqrtDisc) / a;
+        // TODO this somehow breaks both shadows and the sky if tMin isn't lenient?!
         if (root <= tMin || root >= tMax) {
             root = (h + sqrtDisc) / a;
             if (root <= tMin || root >= tMax) return;
