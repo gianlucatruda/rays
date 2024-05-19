@@ -7,7 +7,7 @@ import { Vec3D } from "./vec3d.js";
 
 export const MOVE_MULT = 0.2;
 const SHRINK_FACTOR = 6;
-const MAX_REFL_DEPTH = 5;
+const MAX_REFL_DEPTH = 4;
 const MAX_DIST = 300;
 const CANV_WIDTH = Math.round(window.innerWidth / 1.5);
 const CANV_HEIGHT = Math.floor(CANV_WIDTH / 1.78);
@@ -69,11 +69,9 @@ function traceRay(ray, scene, depth) {
                 Vec3D.subtract(light, hitPoint).norm(),
                 reflecNorm
             );
-            // if (contribution > 0) {
-            //     lambertAmount += contribution;
-            // }
-            // else {console.log(contribution)}
-            lambertAmount += contribution;
+            if (contribution > 0) {
+                lambertAmount += contribution;
+            }
         }
     }
     lambertAmount = Math.min(1, lambertAmount);

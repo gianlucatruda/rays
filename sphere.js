@@ -5,7 +5,7 @@ export class Sphere {
         this.origin = { x: x, y: y, z: z };
         this.radius = r;
     }
-    getIntersect(ray, tMin = 0.00000001, tMax = 1000000) {
+    getIntersect(ray, tMin = 0.001, tMax = 1000) {
         // https://raytracing.github.io/books/RayTracingInOneWeekend.html#surfacenormalsandmultipleobjects/simplifyingtheray-sphereintersectioncode
         const oc = Vec3D.subtract(this.origin, ray.origin);
         const a = Vec3D.dot(ray.vector, ray.vector);
