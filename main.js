@@ -62,15 +62,18 @@ function traceRay(ray, scene, depth) {
         for (const light of scene.lights) {
             let hitFromLight = firstIntersect(new Ray(
                 hitPoint,
-                Vec3D.subtract(hitPoint, light).norm(),
+                Vec3D.subtract(light, hitPoint).norm(),
             ), scene);
-            if (hitFromLight.dist < -0.005) continue; // Light source not visible
+            if (hitFromLight.dist < 1) continue; // Light source not visible
             let contribution = Vec3D.dot(
                 Vec3D.subtract(light, hitPoint).norm(),
-                reflecNorm);
-            if (contribution > 0) {
-                lambertAmount += contribution;
-            }
+                reflecNorm
+            );
+            // if (contribution > 0) {
+            //     lambertAmount += contribution;
+            // }
+            // else {console.log(contribution)}
+            lambertAmount += contribution;
         }
     }
     lambertAmount = Math.min(1, lambertAmount);
@@ -85,7 +88,7 @@ function traceRay(ray, scene, depth) {
             hitPoint,
             reflectedVec,
         );
-        const reflectedColor = traceRay(reflectedRay, scene, depth+1);
+        const reflectedColor = traceRay(reflectedRay, scene, depth + 1);
         if (reflectedColor) {
             newColor = Color.add(newColor, reflectedColor.scaleBy(object.specular));
         }
