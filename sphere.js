@@ -16,7 +16,6 @@ export class Sphere {
         if (discriminant < 0) return;
         const sqrtDisc = Math.sqrt(discriminant);
         let root = (h - sqrtDisc) / a;
-        // TODO this somehow breaks both shadows and the sky if tMin isn't lenient?!
         if (root <= tMin || root >= tMax) {
             root = (h + sqrtDisc) / a;
             if (root <= tMin || root >= tMax) return;

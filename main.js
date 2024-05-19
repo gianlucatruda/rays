@@ -166,7 +166,6 @@ function renderScene(scene) {
     fpsText.innerText = fps.toFixed(0) + "fps";
     resText.innerText = `${WIDTH} x ${HEIGHT}`;
     if (!isRealtime) console.log(`Rendered in ${(tDelta).toFixed(1)}ms (${fps.toFixed(0)}fps)`);
-    // console.log({camera});
 }
 
 export function redrawFrame() {
